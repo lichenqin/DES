@@ -1,7 +1,9 @@
 #ifndef _DES_H_
 #define _DES_H_
 
+/*定义加密模式*/
 #define ENCRYPTION_MODE 1
+/*定义解密模式*/
 #define DECRYPTION_MODE 0
 
 typedef struct {

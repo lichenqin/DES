@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
 	unsigned short int padding;
 
 	if (argc < 2) {
-		printf("You must provide at least 1 parameter, where you specify the action.");
+		printf("Usage: %s   -g <path>\n-t-t-t-e <path>\n-t-t-t-d <path>\n", argv[0]);
 		return 1;
 	}
 
@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
 		// Read key file
 		key_file = fopen(argv[2], "rb");
 		if (!key_file) {
-			printf("Could not open key file to read key.");
+			printf("Could not open key file.");
 			return 1;
 		}
 
