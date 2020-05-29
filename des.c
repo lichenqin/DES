@@ -109,7 +109,7 @@ int right_sub_message_permutation[] =    {16,  7, 20, 21,
 									22, 11,  4, 25};
 
 
-
+//将char输入
 void print_char_as_binary(char input) {
 	int i;
 	for (i=0; i<8; i++) {
@@ -122,9 +122,10 @@ void print_char_as_binary(char input) {
 	}
 }
 
+/*生成main_key*/
 void generate_key(unsigned char* key) {
 	int i;
-	for (i=0; i<8; i++) {
+	for (i=0; i<DES_KEY_SIZE; i++) {
 		key[i] = rand()%255;
 	}
 }

@@ -19,9 +19,6 @@ static FILE *key_file, *input_file, *output_file;
 #define ACTION_ENCRYPT "-e"
 #define ACTION_DECRYPT "-d"
 
-// DES key is 8 bytes long
-#define DES_KEY_SIZE 8
-
 int main(int argc, char* argv[]) {
 	clock_t start, finish;
 	double time_taken;
@@ -33,7 +30,7 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	if (strcmp(argv[1], ACTION_GENERATE_KEY) == 0) { // Generate key file
+	if (strcmp(argv[1], ACTION_GENERATE_KEY) == 0) { // 生成 key 64bit文件
 		if (argc != 3) {
 			printf("Invalid # of parameter specified. Usage: run_des -g keyfile.key");
 			return 1;
@@ -45,12 +42,14 @@ int main(int argc, char* argv[]) {
 			return 1;
 		}
 
+		/*生成随机数种*/
 		unsigned int iseed = (unsigned int)time(NULL);
 		srand (iseed);
 
 		short int bytes_written;
-		unsigned char* des_key = (unsigned char*) malloc(8*sizeof(char));
+		unsigned char* des_key = (unsigned char*) malloc(DES_KEY_SIZE*sizeof(char));
 		generate_key(des_key);
+		/*key为8bytes 即64bit*/
 		bytes_written = fwrite(des_key, 1, DES_KEY_SIZE, key_file);
 		if (bytes_written != DES_KEY_SIZE) {
 			printf("Error writing key to output file.");
@@ -74,9 +73,11 @@ int main(int argc, char* argv[]) {
 			return 1;
 		}
 
+		/*读取key file中的key 并保存到des_key中*/
 		short int bytes_read;
-		unsigned char* des_key = (unsigned char*) malloc(8*sizeof(char));
+		unsigned char* des_key = (unsigned char*) malloc(DES_KEY_SIZE*sizeof(char));
 		bytes_read = fread(des_key, sizeof(unsigned char), DES_KEY_SIZE, key_file);
+
 		if (bytes_read != DES_KEY_SIZE) {
 			printf("Key read from key file does nto have valid key size.");
 			fclose(key_file);
@@ -103,14 +104,16 @@ int main(int argc, char* argv[]) {
 		unsigned long block_count = 0, number_of_blocks;
 		unsigned char* data_block = (unsigned char*) malloc(8*sizeof(char));
 		unsigned char* processed_block = (unsigned char*) malloc(8*sizeof(char));
+		/*why 17?*/
 		key_set* key_sets = (key_set*)malloc(17*sizeof(key_set));
 
+		// 生成16个子key 48bit
 		start = clock();
 		generate_sub_keys(des_key, key_sets);
 		finish = clock();
 		time_taken = (double)(finish - start)/(double)CLOCKS_PER_SEC;
 
-		// Determine process mode
+		// Determine process mode 0 为加密 1 为解密
 		if (strcmp(argv[1], ACTION_ENCRYPT) == 0) {
 			process_mode = ENCRYPTION_MODE;
 			printf("Encrypting..\n");
@@ -120,11 +123,11 @@ int main(int argc, char* argv[]) {
 		}
 
 		// Get number of blocks in the file
-		fseek(input_file, 0L, SEEK_END);
-		file_size = ftell(input_file);
+		fseek(input_file, 0L, SEEK_END);	//移动到文件尾
+		file_size = ftell(input_file);		//获取文件大小
 
-		fseek(input_file, 0L, SEEK_SET);
-		number_of_blocks = file_size/8 + ((file_size%8)?1:0);
+		fseek(input_file, 0L, SEEK_SET);	//移动到文件头
+		number_of_blocks = file_size/8 + ((file_size%8)?1:0);// blocks number: (total_bits / 64bit) + (1 or 0)
 
 		start = clock();
 
